@@ -1,0 +1,46 @@
+name: Daily scrape
+
+on:
+  schedule:
+    - cron: "0 4 * * *"   # 04:00 UTC = 07:00 МСК
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: scrape
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: python -m pytest -q
+
+      - name: Scrape all pages
+        run: python -m scraper.run
+
+      - name: Commit data if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/
+          if git diff --cached --quiet; then
+            echo "Данные не изменились, коммит не нужен"
+          else
+            git commit -m "data: срез цен $(date -u +%Y-%m-%d)"
+            git push
+          fi

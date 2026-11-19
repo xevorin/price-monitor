@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мониторинг цен книжного магазина</title>
+<meta name="description" content="Учебный парсер цен books.toscrape.com: ежедневный сбор через GitHub Actions, таблица с поиском и фильтрами, выгрузка в Excel.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#catalog">К таблице</a>
+
+<header class="top wrap">
+  <h1>Мониторинг цен книжного магазина</h1>
+  <p class="lead">Парсер каждое утро обходит каталог books.toscrape.com (учебный сайт для скрейпинга) и сохраняет цену, рейтинг и наличие каждой книги. Здесь видно последний срез и то, что поменялось со вчерашнего дня.</p>
+
+  <dl class="stats" aria-live="polite">
+    <div><dt>Обновлено</dt><dd id="s-updated">—</dd></div>
+    <div><dt>Книг в каталоге</dt><dd id="s-total">—</dd></div>
+    <div><dt>Средняя цена</dt><dd id="s-avg">—</dd></div>
+    <div><dt>В наличии</dt><dd id="s-stock">—</dd></div>
+  </dl>
+
+  <p class="links">
+    <a class="btn" href="data/latest.xlsx" download>Скачать Excel</a>
+    <a href="https://github.com/xevorin/price-monitor">Код на GitHub</a>
+    <span class="note">Данные обновляет GitHub Actions раз в сутки, в 07:00 по Москве.</span>
+  </p>
+</header>
+
+<main>
+  <section class="changes" aria-labelledby="changes-h">
+    <div class="wrap">
+      <h2 id="changes-h">Что изменилось за сутки</h2>
+      <div id="changes"><p class="muted">Загружаю данные…</p></div>
+    </div>
+  </section>
+
+  <section class="wrap catalog" id="catalog" aria-labelledby="catalog-h">
+    <h2 id="catalog-h">Каталог</h2>
+    <form class="controls" id="controls" role="search" onsubmit="return false">
+      <label class="f-search">
+        <span>Поиск по названию</span>
+        <input type="search" id="q" placeholder="Например, Sapiens" autocomplete="off">
+      </label>
+      <label>
+        <span>Рейтинг</span>
+        <select id="rating">
+          <option value="0">Любой</option>
+          <option value="5">5 звёзд</option>
+          <option value="4">4 и выше</option>
+          <option value="3">3 и выше</option>
+          <option value="2">2 и выше</option>
+        </select>
+      </label>
+      <label>
+        <span>Сортировка</span>
+        <select id="sort">
+          <option value="title">По названию</option>
+          <option value="price-asc">Сначала дешевле</option>
+          <option value="price-desc">Сначала дороже</option>
+          <option value="rating-desc">Сначала с высоким рейтингом</option>
+        </select>
+      </label>
+      <label class="f-check">
+        <input type="checkbox" id="instock">
+        <span>Только в наличии</span>
+      </label>
+    </form>
+
+    <p class="found" id="found" aria-live="polite"></p>
+
+    <div class="table-box" tabindex="0" role="region" aria-label="Таблица книг, прокручивается по горизонтали">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Название</th>
+            <th scope="col">Категория</th>
+            <th scope="col" class="num">Цена</th>
+            <th scope="col">Рейтинг</th>
+            <th scope="col">Наличие</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+
+    <nav class="pager" id="pager" aria-label="Страницы таблицы"></nav>
+  </section>
+</main>
+
+<footer class="wrap foot">
+  Учебный проект · Егор Фарафонов · <a href="https://www.fl.ru/users/farafonovegor07/">профиль на FL.ru</a>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
